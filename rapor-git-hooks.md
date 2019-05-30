@@ -95,7 +95,6 @@ echo '   * ikinci bir emre kadar izinleriniz iptal edilmiştir'
 
 `git-am` tarafından çağrılır. Parametre almaz. Düzeltme eki uygulandıktan sonra ancak bir işlem yapılmadan önce çağrılır. Eğer dönen sonuç sıfır değilse, çalışma ağacı yapılan yamalardan sonra `commit` edilmez. Mevcut çalışma ağacını denetlemek ve geçerli testi geçemezse bir commiti reddetmek için kullanılabilir. 
 
-
 ## applypatch-msg
 
 `git-am` tarafından çağrılır. Önerilen işlem günlüğü iletisini tutan dosyanın adı tek bir parametre alır. Sıfır olmayan sonuç dönerse yama uygulamadan önce `git am`'in iptaline sebep olur.
@@ -106,21 +105,26 @@ echo '   * ikinci bir emre kadar izinleriniz iptal edilmiştir'
 
 ## commit-msg
 
-Bu kanca `git-commit` veya `git-merge` tarafından çağrılır. `--no-verify` seçeneği ile atlanabilir. Önerilen `commit` log mesajı tarafından tek parametre ile çalıştırılır. Sonucun sıfır lması
+Bu kanca `git-commit` veya `git-merge` tarafından çağrılır. `--no-verify` seçeneği ile geçilebilir. Önerilen `commit` log mesajı tarafından tek parametre ile çalıştırılır. Sıfır harici bir değer ile sonlandırılması durumunda çağ
 
 Önerilen taahhüt günlüğü iletisini tutan dosyanın adı tek bir> parametre alır. Sıfır olmayan bir durumla çıkmak komutun> iptal edilmesine neden olur.
 
-An example hook script to check the commit log message.
-Called by "git commit" with one argument, the name of the file
-that has the commit message.  The hook should exit with non-zero
-status after issuing an appropriate message if it wants to stop the
-commit.  The hook is allowed to edit the commit message file.
+~~~bash
+#!/usr/bin/env bash
 
-To enable this hook, rename this file to "commit-msg".
- 
-Uncomment the below to add a Signed-off-by line to the message.
-Doing this in a hook is a bad idea in general, but the prepare-commit-msg
-hook is more suited to it.
+echo $1
+
+if grep -q -i -e "WIP" -e "work in progress" $1; then
+    read -p "You're about to add a WIP commit, do you want to run the CI? [y|n] " -n 1 -r < /dev/tty
+    echo
+    if echo $REPLY | grep -E '^[Nn]$' > /dev/null; then
+        echo "[skip ci]" >> $1
+    fi
+fi
+
+exit 1
+
+~~~
 
 SOB=$(git var GIT_AUTHOR_IDENT | sed -n 's/^\(.*>\).*$/Signed-off-by: \1/p')
 grep -qs "^$SOB" "$1" || echo "$SOB" >> "$1"
