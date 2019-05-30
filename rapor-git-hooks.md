@@ -101,16 +101,21 @@ The third example adds a Signed-off-by line to the message, that can
 still be edited.  This is rarely a good idea.
 
 ## pre-applypatch
-This hook is invoked by git-am[1]. It takes no parameter, and is invoked after the patch is applied, but before a commit is made.
 
 If it exits with non-zero status, then the working tree will not be committed after applying the patch.
 
 It can be used to inspect the current working tree and refuse to make a commit if it does not pass certain test.
-
 The default pre-applypatch hook, when enabled, runs the pre-commit hook, if the latter is enabled.
 
-Bu kanca `git-am` tarafından çağrılır. Parametre almaz ve düzeltme eki uygulandıktan sonra ancak bir işlem yapılmadan önce çağrılır. 
-Eğer sonuç sıfır dönmezse çalışma ağacı yamayı uyguladıktan sonra yapılmayacaktır. Mevcut çalışma ağacını denetlemek ve belirli bir testi geçemezse bir taahhüt vermeyi reddetmek için kullanılabilir. Etkinleştirildiğinde, varsayılan ön uygulama kancası, ikincil etkinse ön işleme kancasını çalıştırır.
+Bu kanca `git-am` tarafından çağrılır. Parametre almaz. Düzeltme eki uygulandıktan sonra ancak bir işlem yapılmadan önce çağrılır.
+
+Eğer sonuç sıfır dönmezse çalışma ağacında yamayı uyguladıktan sonra yapılmayacaktır. 
+
+Mevcut çalışma ağacını denetlemek ve belirli bir testi geçemezse bir taahhüt vermeyi reddetmek için kullanılabilir. 
+
+Etkinleştirildiğinde, varsayılan ön uygulama kancası, ikincil etkinse ön işleme kancasını çalıştırır.
+
+Bu kanca git-am [1] tarafından çağrılır. Parametre almaz ve düzeltme eki uygulandıktan sonra ancak bir işlem yapılmadan önce çağrılır. Sıfır olmayan bir durumla çıkarsa, çalışma ağacı yamayı uyguladıktan sonra yapılmayacaktır. Mevcut çalışma ağacını denetlemek ve belirli bir testi geçemezse bir taahhüt vermeyi reddetmek için kullanılabilir. Etkinleştirildiğinde, varsayılan ön uygulama kancası, ikincil etkinse ön işleme kancasını çalıştırır.
 
 ikinci yazı
 An example hook script to verify what is about to be committed
@@ -119,8 +124,7 @@ by applypatch from an e-mail message.
 The hook should exit with non-zero status after issuing an
 appropriate message if it wants to stop the commit.
 
-To enable this hook, rename this file to "pre-applypatch".
-
+Bir e-posta iletisinden uygulama tarafından ne yapılması gerektiğinin doğrulanması için örnek bir kanca betiği. `commit` durdurulmak istiyorsa uygun bir mesaj gönderdikten sonra kanca sıfır olmayan bir durumdan çıkmalıdır.
 
 
 ## applypatch-msg
