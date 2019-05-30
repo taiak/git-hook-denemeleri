@@ -91,59 +91,25 @@ echo '   * ikinci bir emre kadar izinleriniz iptal edilmiştir'
 
 İşlem günlüğü iletisini hazırlamak için örnek bir `hook` komut dosyasıdır. `git commit` olarak adlandırılan dosyanın ismiyle commit mesajı, ardından da commitin açıklamasıyla mesajın kaynağını içerir. Bu `hook`'un amacı commiti mesaj dosyasını düzenlemektir. `Hook` sıfır olmayan bir durumla başarısız olursa, commit iptal edildi.
 
-
-The second includes the output of "git diff --name-status -r"
-into the message, just before the "git status" output.  It is
-commented because it doesn't cope with --amend or with squashed
-commits.
-
-The third example adds a Signed-off-by line to the message, that can
-still be edited.  This is rarely a good idea.
-
 ## pre-applypatch
 
-If it exits with non-zero status, then the working tree will not be committed after applying the patch.
-
-It can be used to inspect the current working tree and refuse to make a commit if it does not pass certain test.
-The default pre-applypatch hook, when enabled, runs the pre-commit hook, if the latter is enabled.
-
-Bu kanca `git-am` tarafından çağrılır. Parametre almaz. Düzeltme eki uygulandıktan sonra ancak bir işlem yapılmadan önce çağrılır.
-
-Eğer sonuç sıfır dönmezse çalışma ağacında yamayı uyguladıktan sonra yapılmayacaktır. 
-
-Mevcut çalışma ağacını denetlemek ve belirli bir testi geçemezse bir taahhüt vermeyi reddetmek için kullanılabilir. 
-
-Etkinleştirildiğinde, varsayılan ön uygulama kancası, ikincil etkinse ön işleme kancasını çalıştırır.
-
-Bu kanca git-am [1] tarafından çağrılır. Parametre almaz ve düzeltme eki uygulandıktan sonra ancak bir işlem yapılmadan önce çağrılır. Sıfır olmayan bir durumla çıkarsa, çalışma ağacı yamayı uyguladıktan sonra yapılmayacaktır. Mevcut çalışma ağacını denetlemek ve belirli bir testi geçemezse bir taahhüt vermeyi reddetmek için kullanılabilir. Etkinleştirildiğinde, varsayılan ön uygulama kancası, ikincil etkinse ön işleme kancasını çalıştırır.
-
-ikinci yazı
-An example hook script to verify what is about to be committed
-by applypatch from an e-mail message.
-
-The hook should exit with non-zero status after issuing an
-appropriate message if it wants to stop the commit.
-
-Bir e-posta iletisinden uygulama tarafından ne yapılması gerektiğinin doğrulanması için örnek bir kanca betiği. `commit` durdurulmak istiyorsa uygun bir mesaj gönderdikten sonra kanca sıfır olmayan bir durumdan çıkmalıdır.
+`git-am` tarafından çağrılır. Parametre almaz. Düzeltme eki uygulandıktan sonra ancak bir işlem yapılmadan önce çağrılır. Eğer dönen sonuç sıfır değilse, çalışma ağacı yapılan yamalardan sonra `commit` edilmez. Mevcut çalışma ağacını denetlemek ve geçerli testi geçemezse bir commiti reddetmek için kullanılabilir. 
 
 
 ## applypatch-msg
-This hook is invoked by git-am[1]. It takes a single parameter, the name of the file that holds the proposed commit log message. Exiting with a non-zero status causes git am to abort before applying the patch.
 
-The hook is allowed to edit the message file in place, and can be used to normalize the message into some project standard format. It can also be used to refuse the commit after inspecting the message file.
+`git-am` tarafından çağrılır. Önerilen işlem günlüğü iletisini tutan dosyanın adı tek bir parametre alır. Sıfır olmayan sonuç dönerse yama uygulamadan önce `git am`'in iptaline sebep olur.
 
-The default applypatch-msg hook, when enabled, runs the commit-msg hook, if the latter is enabled.
+## sendemail-validate
 
-> ikinci yazı
-> An example hook script to check the commit log message taken by
-> applypatch from an e-mail message.
-> The hook should exit with non-zero status after issuing an
-> appropriate message if it wants to stop the commit.  The hook is
-> allowed to edit the commit message file.
-> To enable this hook, rename this file to "applypatch-msg".
-
+`git-send-email` tarafından çağrılır. Gönderilecek e-postayı tutan dosyanın adı tek bir parametre alır. Sıfır olmayan bir durumdan çıkmak, git gönder e-postasının herhangi bir e-posta göndermeden önce iptal edilmesine neden olur.
 
 ## commit-msg
+
+Bu kanca `git-commit` veya `git-merge` tarafından çağrılır. `--no-verify` seçeneği ile atlanabilir. Önerilen `commit` log mesajı tarafından tek parametre ile çalıştırılır. Sonucun sıfır lması
+
+Önerilen taahhüt günlüğü iletisini tutan dosyanın adı tek bir> parametre alır. Sıfır olmayan bir durumla çıkmak komutun> iptal edilmesine neden olur.
+
 An example hook script to check the commit log message.
 Called by "git commit" with one argument, the name of the file
 that has the commit message.  The hook should exit with non-zero
@@ -169,6 +135,11 @@ This example catches duplicate Signed-off-by lines.
 > The default commit-msg hook, when enabled, detects duplicate "Signed-off-by" lines, and aborts the commit if one is found.
 
 ## fsmonitor-watchman
+
+Bu seçenek, `core.fsmonitor` yapılandırma seçeneği .git / hooks / fsmonitor-watchman olarak ayarlandığında çağrılır. Bir sürüm (şu anda 1) ve 1 Ocak 1970 gece yarısından bu yana geçen nanosaniye cinsinden geçen süre iki argüman alıyor.
+
+Kanca bir sürümden (şu anda 1) ve bir dize olarak biçimlendirilmiş nanosaniye cinsinden bir süreden geçirilir ve verilen zamandan beri değiştirilmiş olan tüm dosyaları saklar. Yollar, çalışan ağacın köküne göre olmalı ve tek bir NUL ile ayrılmalıdır.
+
 An example hook script to integrate Watchman
 (https://facebook.github.io/watchman/) with git to speed up detecting
 new and modified files.
