@@ -14,6 +14,7 @@
 
 puts '---------------HATIRLATMA---------------'
 puts "Yaptığınız commit'i push etmeyi unutmayın!"
+puts %x[ls]
 puts '----------------------------------------'
 
 ~~~
@@ -31,9 +32,6 @@ puts '----------------------------------------'
 
 İşlem günlüğü iletisini hazırlamak için örnek bir `hook` komut dosyasıdır. `git commit` olarak adlandırılan dosyanın ismiyle commit mesajı, ardından da commitin açıklamasıyla mesajın kaynağını içerir. Bu `hook`'un amacı commiti mesaj dosyasını düzenlemektir. `Hook` sıfır olmayan bir durumla başarısız olursa, commit iptal edildi.
 
-
-This hook includes three examples. The first one removes the
-"# Please enter the commit message..." help message.
 
 The second includes the output of "git diff --name-status -r"
 into the message, just before the "git status" output.  It is
