@@ -4,31 +4,46 @@
 `git-commit` tarafından çağrılır. Eğer kullanılmaması gerekirse `--no-verify` seçeneği ile komut çalıştırılmadan geçilebilir. Parametre almaz. Yorum yapılmadan ve hatta yorum logları tutulmadan önce çalıştırılır. Başarılı sayılabilmesi için sonuç değerinin `0` olması gerekir.
 
 ~~~ruby
-#!/usr/bin/env ruby
-
-# yasaklı klasörününe ekleme yapılmamasını engelleyen betik
-# eklenen dizin isimlerini al
-
-folder = 'yasakli/'
-
-files = %x[git diff --cached --name-status | grep -P "^A\t#{folder}"]
-
-# eşleşme yoksa doğru olarak dön
-exit 0 if files.empty?
-
-# eklenen dosya isimlerini ayıkla
-yasaklilar = files.split("\n").map do |file_name| 
-  file_name.split("#{folder}").last
-end
-
-puts "Commit engellendi!!"
-puts "Aşağıdaki dosyaları silip tekrar deneyiniz:"
-yasaklilar.each { |f| puts " * #{folder}#{f}" }
-exit 1
+  #!/usr/bin/env ruby
+  
+  # yasaklı klasörününe ekleme yapılmamasını engelleyen betik
+  # eklenen dizin isimlerini al
+  
+  folder = 'yasakli/'
+  
+  files = %x[git diff --cached --name-status | grep -P "^A\t#{folder}"]
+  
+  # eşleşme yoksa doğru olarak dön
+  exit 0 if files.empty?
+  
+  # eklenen dosya isimlerini ayıkla
+  yasaklilar = files.split("\n").map do |file_name| 
+    file_name.split("#{folder}").last
+  end
+  
+  puts "Commit engellendi!!"
+  puts "Aşağıdaki dosyaları silip tekrar deneyiniz:"
+  yasaklilar.each { |f| puts " * #{folder}#{f}" }
+  exit 1
 ~~~
 
-~~~ruby
-
+~~~sh
+  #!/bin/sh
+  
+  # verilen dizinden dosya silinmesini engelleyen sh betiği
+  folder=dont_delete
+  
+  res=$(git diff --cached --name-status | grep -P "D\t${folder}/" | sed s_^D[[:space:]]\[^/]*\/__)
+  
+  if test -z "$res"; then exit 0; fi
+  
+  echo "HATA: $folder dizininden aşağıdaki dosyalar silinmeye çalışılıyor:"
+  
+  for i in $res; do; echo " -> $i"; done
+  
+  echo "Commit engellendi!"
+  
+  exit 1
 ~~~
 
 ## post-commit
