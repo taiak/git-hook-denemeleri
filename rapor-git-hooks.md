@@ -17,6 +17,14 @@ puts "Yaptığınız commit'i push etmeyi unutmayın!"
 puts '----------------------------------------'
 ~~~
 
+~~~sh
+#!/bin/sh
+
+echo '######## UYARI ########'
+echo '-> Bu projede çalışanların dikkatine: '
+echo '   * ikinci bir emre kadar izinleriniz iptal edilmiştir'
+~~~
+
 ## prepare-commit-msg
 `pre-commit` tetikleyicisinden sonra çağrılır. Tetiklendiği zaman bir text editörü içerisinde yorum mesajı üretir. Sıkıştırılmış veya birleştirilmiş yorum mesajlarını değiştirmek için bu tetikleyici kullanılır. Başarılı sonuç dönmesi için `0` dönmesi gerekir. Eğer sıfırdan farklı bir değer dönerse yani başarısız sonuç dönerse `git commit` yorumu iptal edilir.
 
