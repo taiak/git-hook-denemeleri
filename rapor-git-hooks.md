@@ -131,9 +131,10 @@ Bu kanca `git-commit` veya `git-merge` tarafından çağrılır. `--no-verify` s
   # committeki yasakli kelimeleri sansürleyen ruby betiği
   file_name  = ARGV[0]
   content    = File.read(file_name)
+
   forbidden_words = ["yasak1", "yasak2"]
   
-  forbidden_words.each { |f_word| content.gsub!(f_word, '***') }
+  forbidden_words.each { |f_word| content.gsub!(f_word, '*' * f_word.size) }
   
   File.write(file_name, content)
 ~~~
