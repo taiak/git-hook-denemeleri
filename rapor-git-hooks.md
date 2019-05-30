@@ -14,7 +14,7 @@
 
 puts '---------------HATIRLATMA---------------'
 puts "Yaptığınız commit'i push etmeyi unutmayın!"
-puts %x[ls]
+puts %x[w]
 puts '----------------------------------------'
 
 ~~~
