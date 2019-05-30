@@ -14,7 +14,7 @@
 
 puts '---------------HATIRLATMA---------------'
 puts "Kara tren gecikir belki hiç..!"
-puts %x[sl]
+system(sl)
 puts '----------------------------------------'
 
 ~~~
