@@ -7,14 +7,14 @@
 ~~~
 
 ## post-commit
-`commit` yollandıktan sonra çalıştırılır.
+`git-commit` tarafından çağırılır. Parametre almaz, `commit` yapıldıktan sonra çalıştırılır. Uyarı amaçlıdır ve `commit`'in sonucunu etkilemez.
 
 ~~~ruby
 #!/usr/bin/env ruby
 
-puts '===============HATIRLATMA==============='
+puts '---------------HATIRLATMA---------------'
 puts "Yaptığınız commit'i push etmeyi unutmayın!"
-puts '========================================'
+puts '----------------------------------------'
 
 ~~~
 
