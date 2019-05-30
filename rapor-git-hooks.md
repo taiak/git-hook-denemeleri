@@ -139,6 +139,7 @@ Bu kanca `git-commit` veya `git-merge` tarafından çağrılır. `--no-verify` s
   File.write(file_name, content)
 ~~~
 
+
 ## fsmonitor-watchman
 
 Bu seçenek, `core.fsmonitor` yapılandırma seçeneği .git / hooks / fsmonitor-watchman olarak ayarlandığında çağrılır. Bir sürüm (şu anda 1) ve 1 Ocak 1970 gece yarısından bu yana geçen nanosaniye cinsinden geçen süre iki argüman alıyor.
