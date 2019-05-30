@@ -41,31 +41,7 @@ echo '   * ikinci bir emre kadar izinleriniz iptal edilmiştir'
 3. SHA1 türünde uygun yorum hashi de alabilmektedir. Bu hashi kullaabilmek için `-c`, `-C` veya `--ammend` parametrelerini girmek gerekmektedir.
 
 ~~~ruby
-#!/usr/bin/env ruby
 
-message = ARGV[0]
-branch = %x[git rev-parse --abbrev-ref HEAD]
-
-match = /^feature\/(\w+-\d+)-/.match(branch)
-
-# This makes it easy to extend this hook to provide multiple variables that can then be
-# used in the commit message template.
-variables = {
-	'ISSUE' => (match == nil ? nil : "#{match[1]}: ")
-}
-
-text = File.read(message)
- 
-# Simply replace all the placeholders of the form "$(SOME_NAME)" with the value
-# provided in the variables hash.
-text.gsub!(/\$\(([^)]+)\)/) do |m|
-	name = $1
-	if (variables.include?(name))
-		variables[name]
-	end
-end
-
-File.write(message, text)
 ~~~
 
 İşlem günlüğü iletisini hazırlamak için örnek bir `hook` komut dosyasıdır. `git commit` olarak adlandırılan dosyanın ismiyle commit mesajı, ardından da commitin açıklamasıyla mesajın kaynağını içerir. Bu `hook`'un amacı commiti mesaj dosyasını düzenlemektir. `Hook` sıfır olmayan bir durumla başarısız olursa, commit iptal edildi.
