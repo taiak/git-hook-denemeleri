@@ -4,7 +4,13 @@
 `git-commit` tarafından çağrılır. Eğer kullanılmaması gerekirse `--no-verify` seçeneği ile komut çalıştırılmadan geçilebilir. Parametre almaz. Yorum yapılmadan ve hatta yorum logları tutulmadan önce çalıştırılır. Başarılı sayılabilmesi için sonuç değerinin `0` olması gerekir.
 
 ~~~ruby
+#!/usr/bin/env ruby
 
+ARGV
+import sys, os
+commit_msg_filepath = sys.argv[1]
+with open(commit_msg_filepath, 'w') as f:
+f.write("# Please include a useful commit message!")
 ~~~
 
 ~~~ruby
@@ -28,7 +34,6 @@ echo '######## UYARI ########'
 echo '-> Bu projede çalışanların dikkatine: '
 echo '   * ikinci bir emre kadar izinleriniz iptal edilmiştir'
 ~~~
-
 
 ## prepare-commit-msg
 `pre-commit` tetikleyicisinden sonra çağrılır. Tetiklendiği zaman bir text editörü içerisinde yorum mesajı üretir. Sıkıştırılmış veya birleştirilmiş yorum mesajlarını değiştirmek için bu tetikleyici kullanılır. Başarılı sonuç dönmesi için `0` dönmesi gerekir. Eğer sıfırdan farklı bir değer dönerse yani başarısız sonuç dönerse `git commit` yorumu iptal edilir.
@@ -194,11 +199,13 @@ merged to 'next' branch from getting rebased, because allowing it
 would result in rebasing already published history.
 
 ## pre-receive
-An example hook script to make use of push options.
-The example simply echoes all push options that start with 'echoback='
-and rejects all pushes when the "reject" push option is used.
+Push seçeneklerinden yararlanmak için örnek bir kanca betiği.
+Örnek, `echoback =` ile başlayan tüm itme seçeneklerini yansıtır.
+ve `reject` basma seçeneği kullanıldığında tüm basmaları reddeder.
 
-To enable this hook, rename this file to "pre-receive".
+~~~ 
+  //TODO: add command
+~~~
 
 ## update
 
