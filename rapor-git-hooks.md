@@ -13,8 +13,8 @@
 #!/usr/bin/env ruby
 
 puts '---------------HATIRLATMA---------------'
-puts "Yaptığınız commit'i push etmeyi unutmayın!"
-puts %x[w]
+puts "Kara tren gecikir belki hiç..!"
+puts %x[sl]
 puts '----------------------------------------'
 
 ~~~
