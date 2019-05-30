@@ -1,7 +1,11 @@
 # Rapor Edilecek Hooklar
 
 ## pre-commit
-`pre-commit`, `git-commit` tarafından çağrılır. Eğer kullanılmaması gerekirse `--no-verify` seçeneği ile komut çalıştırılmadan geçilebilir. Parametre almaz. Yorum yapılmadan ve hatta yorum logları tutulmadan önce çalıştırılır. Başarılı sayılabilmesi için sonuç değerin `0` olması gerekir.
+`git-commit` tarafından çağrılır. Eğer kullanılmaması gerekirse `--no-verify` seçeneği ile komut çalıştırılmadan geçilebilir. Parametre almaz. Yorum yapılmadan ve hatta yorum logları tutulmadan önce çalıştırılır. Başarılı sayılabilmesi için sonuç değerinin `0` olması gerekir.
+
+~~~ruby
+
+~~~
 
 ~~~ruby
 ~~~
@@ -25,6 +29,7 @@ echo '-> Bu projede çalışanların dikkatine: '
 echo '   * ikinci bir emre kadar izinleriniz iptal edilmiştir'
 ~~~
 
+
 ## prepare-commit-msg
 `pre-commit` tetikleyicisinden sonra çağrılır. Tetiklendiği zaman bir text editörü içerisinde yorum mesajı üretir. Sıkıştırılmış veya birleştirilmiş yorum mesajlarını değiştirmek için bu tetikleyici kullanılır. Başarılı sonuç dönmesi için `0` dönmesi gerekir. Eğer sıfırdan farklı bir değer dönerse yani başarısız sonuç dönerse `git commit` yorumu iptal edilir.
 
@@ -38,6 +43,32 @@ echo '   * ikinci bir emre kadar izinleriniz iptal edilmiştir'
 ~~~ruby
 #!/usr/bin/env ruby
 
+message = ARGV[0]
+branch = %x[git rev-parse --abbrev-ref HEAD]
+# Issue IDs are assumed to be of the form "XXXXX-NN" and the branch name for a
+# feature branch with gitflow convention is then named
+# "feature/XXXXX-NN-some-description".
+# If your issues have a different pattern, simply adapt this regular expression
+match = /^feature\/(\w+-\d+)-/.match(branch)
+
+# This makes it easy to extend this hook to provide multiple variables that can then be
+# used in the commit message template.
+variables = {
+	'ISSUE' => (match == nil ? nil : "#{match[1]}: ")
+}
+
+text = File.read(message)
+
+# Simply replace all the placeholders of the form "$(SOME_NAME)" with the value
+# provided in the variables hash.
+text.gsub!(/\$\(([^)]+)\)/) do |m|
+	name = $1
+	if (variables.include?(name))
+		variables[name]
+	end
+end
+
+File.write(message, text)
 ~~~
 
 İşlem günlüğü iletisini hazırlamak için örnek bir `hook` komut dosyasıdır. `git commit` olarak adlandırılan dosyanın ismiyle commit mesajı, ardından da commitin açıklamasıyla mesajın kaynağını içerir. Bu `hook`'un amacı commiti mesaj dosyasını düzenlemektir. `Hook` sıfır olmayan bir durumla başarısız olursa, commit iptal edildi.
