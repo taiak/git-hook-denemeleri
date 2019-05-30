@@ -29,7 +29,6 @@
 
 ~~~sh
   #!/bin/sh
-  
   # verilen dizinden dosya silinmesini engelleyen sh betiği
   folder=dont_delete
   
@@ -38,11 +37,9 @@
   if test -z "$res"; then exit 0; fi
   
   echo "HATA: $folder dizininden aşağıdaki dosyalar silinmeye çalışılıyor:"
-  
   for i in $res; do; echo " -> $i"; done
   
   echo "Commit engellendi!"
-  
   exit 1
 ~~~
 
@@ -66,12 +63,12 @@ echo '   * ikinci bir emre kadar izinleriniz iptal edilmiştir'
 ~~~
 
 ## prepare-commit-msg
-`pre-commit` tetikleyicisinden sonra çağrılır. Tetiklendiği zaman bir text editörü içerisinde yorum mesajı üretir. Sıkıştırılmış veya birleştirilmiş yorum mesajlarını değiştirmek için bu tetikleyici kullanılır. Başarılı sonuç dönmesi için `0` dönmesi gerekir. Eğer sıfırdan farklı bir değer dönerse yani başarısız sonuç dönerse `git commit` yorumu iptal edilir.
+`pre-commit` `hook`'undan sonra çağrılır. Tetiklendiği zaman bir text editörü içerisinde yorum mesajı üretir. Başarılı sonuç dönmesi için `0` dönmesi gerekir. Eğer sıfırdan farklı bir değer dönerse yani başarısız sonuç dönerse `git commit` komutu iptal edilir.
 
 `prepate-commit-msg` scripti 1-3 aralığında parametre alır. 
 1. Basılacak mesajı içeren geçici dosyanın adı. Bu dosya değiştirilerek onay mesajı değiştirilebilir
 
-2. Yorum türü. `message`, `template`, `merge`, `squash` türlerinde olabilir. `message` türü için -m veya -F parametresiyle, `template` için -T parametresiyle kullanılır. Yorumun türü `merge` veya `squash` ise bunlar da kendi içeriğinde kullanılmış olur.
+2. `commit` türü. `message`, `template`, `merge`, `squash` türlerinde olabilir. `message` türü için -m veya -F parametresiyle, `template` için -T parametresiyle kullanılır. 
 
 3. SHA1 türünde uygun yorum hashi de alabilmektedir. Bu hashi kullaabilmek için `-c`, `-C` veya `--ammend` parametrelerini girmek gerekmektedir.
 
