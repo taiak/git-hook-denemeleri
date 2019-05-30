@@ -13,10 +13,8 @@
 #!/usr/bin/env ruby
 
 puts '---------------HATIRLATMA---------------'
-puts "Kara tren gecikir belki hiç..!"
-system(sl)
+puts "Yaptığınız commit'i push etmeyi unutmayın!"
 puts '----------------------------------------'
-
 ~~~
 
 ## prepare-commit-msg
@@ -29,6 +27,10 @@ puts '----------------------------------------'
 
 3. SHA1 türünde uygun yorum hashi de alabilmektedir. Bu hashi kullaabilmek için `-c`, `-C` veya `--ammend` parametrelerini girmek gerekmektedir.
 
+~~~ruby
+#!/usr/bin/env ruby
+
+~~~
 
 İşlem günlüğü iletisini hazırlamak için örnek bir `hook` komut dosyasıdır. `git commit` olarak adlandırılan dosyanın ismiyle commit mesajı, ardından da commitin açıklamasıyla mesajın kaynağını içerir. Bu `hook`'un amacı commiti mesaj dosyasını düzenlemektir. `Hook` sıfır olmayan bir durumla başarısız olursa, commit iptal edildi.
 
