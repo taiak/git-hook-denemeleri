@@ -105,38 +105,38 @@ echo '   * ikinci bir emre kadar izinleriniz iptal edilmiştir'
 
 ## commit-msg
 
-Bu kanca `git-commit` veya `git-merge` tarafından çağrılır. `--no-verify` seçeneği ile geçilebilir. Önerilen `commit` log mesajı tarafından tek parametre ile çalıştırılır. Sıfır harici bir değer ile sonlandırılması durumunda çağ
+Bu kanca `git-commit` veya `git-merge` tarafından çağrılır. `--no-verify` seçeneği ile geçilebilir. Önerilen `commit` log mesajı tarafından tek parametre ile çalıştırılır. Sıfır harici bir değer ile sonlandırılması durumunda `commit` iptal edilir.
 
-Önerilen taahhüt günlüğü iletisini tutan dosyanın adı tek bir> parametre alır. Sıfır olmayan bir durumla çıkmak komutun> iptal edilmesine neden olur.
-
-~~~bash
-#!/usr/bin/env bash
-
-echo $1
-
-if grep -q -i -e "WIP" -e "work in progress" $1; then
-    read -p "You're about to add a WIP commit, do you want to run the CI? [y|n] " -n 1 -r < /dev/tty
-    echo
-    if echo $REPLY | grep -E '^[Nn]$' > /dev/null; then
-        echo "[skip ci]" >> $1
-    fi
-fi
-
-exit 1
-
+~~~ruby
+  #!/usr/bin/env ruby
+  
+  # yasakli kelimeleri içeren commit mesajlarını engelleyen ruby betiği
+  dosya_adi         = ARGV[0]
+  dosya             = File.read(dosya_adi)
+  yasakli_kelimeler = ["yasakli", "kelime", "at"]
+  
+  yasakli = nil
+  yasakli_kelimeler.any? { |v| yasakli = v if icerik.include? v } 
+  
+  if yasakli
+  	puts "HATA: Herkese açık bir projede \"#{yasakli}\" gibi kelimelerin kullanılması uygun değildir!"
+  	puts "Commit iptal ediliyor!"
+  	exit 1
+  end
 ~~~
 
-SOB=$(git var GIT_AUTHOR_IDENT | sed -n 's/^\(.*>\).*$/Signed-off-by: \1/p')
-grep -qs "^$SOB" "$1" || echo "$SOB" >> "$1"
- 
-This example catches duplicate Signed-off-by lines.
-
-> ikinci yazı:
-> This hook is invoked by git-commit[1] and git-merge[1], and can be bypassed with the --no-verify option. It takes a single > parameter, the name of the file that holds the proposed commit log message. Exiting with a non-zero status causes the command to > abort.
-> 
-> The hook is allowed to edit the message file in place, and can be used to normalize the message into some project standard format. > It can also be used to refuse the commit after inspecting the message file.
-> 
-> The default commit-msg hook, when enabled, detects duplicate "Signed-off-by" lines, and aborts the commit if one is found.
+~~~ruby
+  #!/usr/bin/env ruby
+  
+  # committeki yasakli kelimeleri sansürleyen ruby betiği
+  file_name  = ARGV[0]
+  content    = File.read(file_name)
+  forbidden_words = ["yasak1", "yasak2"]
+  
+  forbidden_words.each { |f_word| content.gsub!(f_word, '***') }
+  
+  File.write(file_name, content)
+~~~
 
 ## fsmonitor-watchman
 
