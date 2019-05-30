@@ -6,14 +6,29 @@
 ~~~ruby
 #!/usr/bin/env ruby
 
-ARGV
-import sys, os
-commit_msg_filepath = sys.argv[1]
-with open(commit_msg_filepath, 'w') as f:
-f.write("# Please include a useful commit message!")
+# yasaklı klasörününe ekleme yapılmamasını engelleyen betik
+# eklenen dizin isimlerini al
+
+folder = 'yasakli/'
+
+files = %x[git diff --cached --name-status | grep -P "^A\t#{folder}"]
+
+# eşleşme yoksa doğru olarak dön
+exit 0 if files.empty?
+
+# eklenen dosya isimlerini ayıkla
+yasaklilar = files.split("\n").map do |file_name| 
+  file_name.split("#{folder}").last
+end
+
+puts "Commit engellendi!!"
+puts "Aşağıdaki dosyaları silip tekrar deneyiniz:"
+yasaklilar.each { |f| puts " * #{folder}#{f}" }
+exit 1
 ~~~
 
 ~~~ruby
+
 ~~~
 
 ## post-commit
