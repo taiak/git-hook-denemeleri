@@ -42,7 +42,7 @@ echo '   * ikinci bir emre kadar izinleriniz iptal edilmiştir'
 
 ~~~ruby
 #!/usr/bin/env ruby
-
+confy
 message = ARGV[0]
 branch = %x[git rev-parse --abbrev-ref HEAD]
 
