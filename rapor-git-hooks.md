@@ -70,34 +70,23 @@ echo '   * ikinci bir emre kadar izinleriniz iptal edilmiştir'
 
 2. `commit` türü. `message`, `template`, `merge`, `squash` türlerinde olabilir. `message` türü için -m veya -F parametresiyle, `template` için -T parametresiyle kullanılır. 
 
-3. SHA1 türünde uygun yorum hashi de alabilmektedir. Bu hashi kullaabilmek için `-c`, `-C` veya `--ammend` parametrelerini girmek gerekmektedir.
+3. SHA1 türünde uygun yorum hashi de alabilmektedir. Bu hashi kullanabilmek için `-c`, `-C` veya `--ammend` parametrelerini girmek gerekmektedir.
 
 ~~~ruby
-#!/usr/bin/env ruby
-confy
-message = ARGV[0]
-branch = %x[git rev-parse --abbrev-ref HEAD]
-
-match = /^feature\/(\w+-\d+)-/.match(branch)
-
-# This makes it easy to extend this hook to provide multiple variables that can then be
-# used in the commit message template.
-variables = {
-	'ISSUE' => (match == nil ? nil : "#{match[1]}: ")
-}
-
-text = File.read(message)
- 
-# Simply replace all the placeholders of the form "$(SOME_NAME)" with the value
-# provided in the variables hash.
-text.gsub!(/\$\(([^)]+)\)/) do |m|
-	name = $1
-	if (variables.include?(name))
-		variables[name]
-	end
-end
-
-File.write(message, text)
+  #!/usr/bin/env ruby
+  # commit dosyasında yorum satırı hariç satırların md5
+  # değerini alarak yorumun başına ekler 
+  require 'digest'
+  
+  commit_msg_file = ARGV[0]
+  
+  text = File.readlines(commit_msg_file).map { |l| 
+    l.gsub!(/^[#].*/, '') 
+  }.join
+  
+  text = "md5: " + Digest::MD5.hexdigest(text) + "\n" + text
+  
+  File.write(commit_msg_file, text)
 ~~~
 
 İşlem günlüğü iletisini hazırlamak için örnek bir `hook` komut dosyasıdır. `git commit` olarak adlandırılan dosyanın ismiyle commit mesajı, ardından da commitin açıklamasıyla mesajın kaynağını içerir. Bu `hook`'un amacı commiti mesaj dosyasını düzenlemektir. `Hook` sıfır olmayan bir durumla başarısız olursa, commit iptal edildi.
