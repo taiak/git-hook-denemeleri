@@ -45,10 +45,7 @@ echo '   * ikinci bir emre kadar izinleriniz iptal edilmiştir'
 
 message = ARGV[0]
 branch = %x[git rev-parse --abbrev-ref HEAD]
-# Issue IDs are assumed to be of the form "XXXXX-NN" and the branch name for a
-# feature branch with gitflow convention is then named
-# "feature/XXXXX-NN-some-description".
-# If your issues have a different pattern, simply adapt this regular expression
+
 match = /^feature\/(\w+-\d+)-/.match(branch)
 
 # This makes it easy to extend this hook to provide multiple variables that can then be
@@ -58,7 +55,7 @@ variables = {
 }
 
 text = File.read(message)
-
+ 
 # Simply replace all the placeholders of the form "$(SOME_NAME)" with the value
 # provided in the variables hash.
 text.gsub!(/\$\(([^)]+)\)/) do |m|
