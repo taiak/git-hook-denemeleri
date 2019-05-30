@@ -12,9 +12,10 @@
 ~~~ruby
 #!/usr/bin/env ruby
 
-puts "===============HATIRLATMA========"
+puts '===============HATIRLATMA==============='
 puts "Yaptığınız commit'i push etmeyi unutmayın!"
-puts "======================="
+puts '========================================'
+
 ~~~
 
 ## prepare-commit-msg
