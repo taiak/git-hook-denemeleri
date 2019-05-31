@@ -3,30 +3,6 @@
 ## pre-commit
 `git-commit` tarafından çağrılır. Eğer kullanılmaması gerekirse `--no-verify` seçeneği ile komut çalıştırılmadan geçilebilir. Parametre almaz. Yorum yapılmadan ve hatta yorum logları tutulmadan önce çalıştırılır. Başarılı sayılabilmesi için sonuç değerinin `0` olması gerekir.
 
-~~~ruby
-  #!/usr/bin/env ruby
-  
-  # yasaklı klasörününe ekleme yapılmamasını engelleyen betik
-  # eklenen dizin isimlerini al
-  
-  folder = 'yasakli/'
-  
-  files = %x[git diff --cached --name-status | grep -P "^A\t#{folder}"]
-  
-  # eşleşme yoksa doğru olarak dön
-  exit 0 if files.empty?
-  
-  # eklenen dosya isimlerini ayıkla
-  yasaklilar = files.split("\n").map do |file_name| 
-    file_name.split("#{folder}").last
-  end
-  
-  puts "Commit engellendi!!"
-  puts "Aşağıdaki dosyaları silip tekrar deneyiniz:"
-  yasaklilar.each { |f| puts " * #{folder}#{f}" }
-  exit 1
-~~~
-
 ~~~sh
   #!/bin/sh
   # verilen dizinden dosya silinmesini engelleyen sh betiği
@@ -45,14 +21,6 @@
 
 ## post-commit
 `git-commit` tarafından çağırılır. Parametre almaz, `commit` yapıldıktan sonra çalıştırılır. Uyarı amaçlıdır ve `commit`'in sonucunu etkilemez.
-
-~~~ruby
-#!/usr/bin/env ruby
-
-puts '---------------HATIRLATMA---------------'
-puts "Yaptığınız commit'i push etmeyi unutmayın!"
-puts '----------------------------------------'
-~~~
 
 ~~~sh
 #!/bin/sh
@@ -74,24 +42,7 @@ echo '   * ikinci bir emre kadar izinleriniz iptal edilmiştir'
 
 ~~~ruby
   #!/usr/bin/env ruby
-  # commit dosyasında yorum satırı hariç satırların md5
-  # değerini alarak yorumun başına ekler 
-  require 'digest'
-  
-  commit_msg_file = ARGV[0]
-  
-  text = File.readlines(commit_msg_file).map { |l| 
-    l.gsub!(/^[#].*/, '') 
-  }.join
-  
-  text = "md5: " + Digest::MD5.hexdigest(text) + "\n" + text
-  
-  File.write(commit_msg_file, text)
-~~~
-
-~~~ruby
-  #!/usr/bin/env ruby
-  # Commit'in sonuna bir söz ekler
+  # Grup motivesi arttırmak için commit'in sonuna bir söz ekler
   msg_file = ARGV[0]
   content  = File.read(msg_file)
   QUOTE_OF_DAY = '"Yarını iyileştirmenin tek yolu bugün neyi yanlış yaptığını bilmektir!" ~Robin Sahrman~'.freeze
@@ -100,20 +51,6 @@ echo '   * ikinci bir emre kadar izinleriniz iptal edilmiştir'
   
   File.write(msg_file, content)
 ~~~
-
-## pre-applypatch
-
-`git-am` tarafından çağrılır. Parametre almaz. Düzeltme eki uygulandıktan sonra ancak bir işlem yapılmadan önce çağrılır. Eğer dönen sonuç sıfır değilse, çalışma ağacı yapılan yamalardan sonra `commit` edilmez. Mevcut çalışma ağacını denetlemek ve geçerli testi geçemezse bir commiti reddetmek için kullanılabilir. 
-
-## applypatch-msg
-
-`git-am` tarafından çağrılır. Önerilen işlem günlüğü iletisini tutan dosyanın adı tek bir parametre alır. Sıfır olmayan sonuç dönerse yama uygulamadan önce `git am`'in iptaline sebep olur.
-
-
-## sendemail-validate
-
-`git-send-email` tarafından çağrılır. Gönderilecek e-postayı tutan dosyanın adı tek bir parametre alır. Sıfır olmayan bir durumdan çıkmak, git gönder e-postasının herhangi bir e-posta göndermeden önce iptal edilmesine neden olur.
-
 
 ## commit-msg
 
@@ -137,20 +74,6 @@ Bu kanca `git-commit` veya `git-merge` tarafından çağrılır. `--no-verify` s
   end
 ~~~
 
-~~~ruby
-  #!/usr/bin/env ruby
-  
-  # committeki yasakli kelimeleri sansürleyen ruby betiği
-  file_name  = ARGV[0]
-  content    = File.read(file_name)
-
-  forbidden_words = ["yasak1", "yasak2"]
-  
-  forbidden_words.each { |f_word| content.gsub!(f_word, '*' * f_word.size) }
-  
-  File.write(file_name, content)
-~~~
-
 ## pre-receive
 `git-receive-pack` tarafından çağrılır. Biri depoya birşey yüklemek için `git push` çalıştırdığında her commit için ayrı ayrı çalışır. Uzak sunucu da bulunmalıdır. Argüman almaz fakat ancak her bir `ref` için güncellenmek üzere standart girdiyle formatın bir satırını alır. Bu satır `<eski-değer> SP <yeni-değer> SP <ref-adı> LF` şeklinde değerlerden oluşur. `<eski-değer>` `ref` içerisinde saklanan eski nesne adı, `<yeni-değer>` `ref` içerisinde bulunan yeni nesne adını, `<ref-adı>` da `ref`'in tam adını içerir.
 
@@ -162,19 +85,6 @@ Bu kanca `git-commit` veya `git-merge` tarafından çağrılır. `--no-verify` s
     if git diff "$eski_sha" "$yeni_sha" | grep -qE '^\+(<<<<<<<|>>>>>>>)'; then
       echo "Conflict'e sebep olacak işaretler bulundu $(basename "$refname")."
       git diff "$eski_sha" "$yeni_sha" | grep -nE '^\+(<<<<<<<|>>>>>>>)'
-      exit 1
-    fi
-  done
-~~~
-
-~~~bash
-  #!/bin/bash
-  # check if
-  while read eski_sha yeni_sha refname
-  do
-    if git diff "$eski_sha" "$yeni_sha" | grep -qE '^\+.*\s+$'; then
-      echo "HATA: Satır sonunda boşluk karakteri var!"
-      git diff "$eski_sha" "$yeni_sha" | grep -nE '^\+.*\s+$'
       exit 1
     fi
   done
@@ -230,11 +140,6 @@ Güncelleme sonrasında, push edilen `HEAD`'in ne olduğu içinde bulunmasına r
   echo "Auto packing deferred; not on AC"
   exit 1
 ~~~
-
-## fsmonitor-watchman
-`core.fsmonitor` yapılandırma seçeneği .git/hooks/fsmonitor-watchman olarak ayarlandığında çağırılır. İki parametre alır, birinci parametre versiyon bilgisi, ikinci parametre ise zaman bilgisidir. Zaman bilgisi 1 Ocak 1970'den başlayarak şimdiye kadar geçen nanosaniyeler şeklinde tutulur. Çalışma yolları, çalışma dizinin köküne göre olmalı ve tek bir NUL ile ayrılmalıdır.
-
-Çıkış durumu, git'i aramasını sınırlamak için kancadaki verileri kullanıp kullanmayacağını belirler. Hata durumunda, tüm dosya ve klasörleri doğrulamak için yapılan değişikler geri alınacaktır.
 
 ## pre-push
 Uzaktaki durumu kontrol ettikten sonra, ancak herhangi bir şey `push` yapılmadan önce `git push` taradından çağırılır. Sıfır olmayan bir sonuç dönerse, hiçbir şey `push` yapılmaz. 2 tane parametre alır. Birincisi parametre gönderme yapılan uzak sunucunun adıdır. İkincisi parametre gönderme yapılan `URL`'dir. Eğer gnerme yapılan uzak sunucuya isim verilmezse iki parametre de eşit olacaktır. 
@@ -304,3 +209,20 @@ Yerel bir depoda bir git çekme işlemi yapıldığında `git-merge` tarafından
 ## rebase
 `Squash` birleştirmesi ve onarım işlemi için, ezilen edilen commitler, ezme işlemine yeniden yazılmış şekilde aktarılır. 
 `commit`ler kesi olarak `rebase` tarafından işlendiği sırada listelenir. 
+
+## pre-applypatch
+
+`git-am` tarafından çağrılır. Parametre almaz. Düzeltme eki uygulandıktan sonra ancak bir işlem yapılmadan önce çağrılır. Eğer dönen sonuç sıfır değilse, çalışma ağacı yapılan yamalardan sonra `commit` edilmez. Mevcut çalışma ağacını denetlemek ve geçerli testi geçemezse bir commiti reddetmek için kullanılabilir. 
+
+## applypatch-msg
+
+`git-am` tarafından çağrılır. Önerilen işlem günlüğü iletisini tutan dosyanın adı tek bir parametre alır. Sıfır olmayan sonuç dönerse yama uygulamadan önce `git am`'in iptaline sebep olur.
+
+## sendemail-validate
+
+`git-send-email` tarafından çağrılır. Gönderilecek e-postayı tutan dosyanın adı tek bir parametre alır. Sıfır olmayan bir durumdan çıkmak, git gönder e-postasının herhangi bir e-posta göndermeden önce iptal edilmesine neden olur.
+
+## fsmonitor-watchman
+`core.fsmonitor` yapılandırma seçeneği .git/hooks/fsmonitor-watchman olarak ayarlandığında çağırılır. İki parametre alır, birinci parametre versiyon bilgisi, ikinci parametre ise zaman bilgisidir. Zaman bilgisi 1 Ocak 1970'den başlayarak şimdiye kadar geçen nanosaniyeler şeklinde tutulur. Çalışma yolları, çalışma dizinin köküne göre olmalı ve tek bir NUL ile ayrılmalıdır.
+
+Çıkış durumu, git'i aramasını sınırlamak için kancadaki verileri kullanıp kullanmayacağını belirler. Hata durumunda, tüm dosya ve klasörleri doğrulamak için yapılan değişikler geri alınacaktır.
