@@ -105,13 +105,19 @@ echo '   * ikinci bir emre kadar izinleriniz iptal edilmiştir'
 
 `git-am` tarafından çağrılır. Parametre almaz. Düzeltme eki uygulandıktan sonra ancak bir işlem yapılmadan önce çağrılır. Eğer dönen sonuç sıfır değilse, çalışma ağacı yapılan yamalardan sonra `commit` edilmez. Mevcut çalışma ağacını denetlemek ve geçerli testi geçemezse bir commiti reddetmek için kullanılabilir. 
 
+ //TODO: add code
+
 ## applypatch-msg
 
 `git-am` tarafından çağrılır. Önerilen işlem günlüğü iletisini tutan dosyanın adı tek bir parametre alır. Sıfır olmayan sonuç dönerse yama uygulamadan önce `git am`'in iptaline sebep olur.
 
+ //TODO: add code
+
 ## sendemail-validate
 
 `git-send-email` tarafından çağrılır. Gönderilecek e-postayı tutan dosyanın adı tek bir parametre alır. Sıfır olmayan bir durumdan çıkmak, git gönder e-postasının herhangi bir e-posta göndermeden önce iptal edilmesine neden olur.
+
+//TODO: add code
 
 ## commit-msg
 
@@ -150,31 +156,16 @@ Bu kanca `git-commit` veya `git-merge` tarafından çağrılır. `--no-verify` s
 ~~~
 
 ## pre-receive
-`git-receive-pack` tarafından çağrılır.
+`git-receive-pack` tarafından çağrılır. Biri repoya birşey yüklemek için `git push` çalıştırdığında her commit için ayrı ayrı çalışır. Uzak sunucu da bulunmalıdır. Argüman almaz fakat ancak her bir `ref` için güncellenmek üzere standart girdiyle formatın bir satırını alır. Bu satır `<eski-değer> SP <yeni-değer> SP <ref-adı> LF` şeklinde değerlerden oluşur. `<eski-değer>` `ref` içerisinde saklanan eski nesne adı, `<yeni-değer>` `ref` içerisinde bulunan yeni nesne adını, `<ref-adı>` da `ref`'in tam adını içerir.
 
-Bu kanca`git` referensları yolladığı veya güncellediğinde ve deposundaki referansları güncellediğinde `git-pack-pack` tarafından çağrılır.
-
-This hook is invoked by git-receive-pack[1] when it reacts to git push and updates reference(s) in its repository. Just before starting to update refs on the remote repository, the pre-receive hook is invoked. Its exit status determines the success or failure of the update.
-
-This hook executes once for the receive operation. It takes no arguments, but for each ref to be updated it receives on standard input a line of the format:
-
-~~~sh
-<old-value> SP <new-value> SP <ref-name> LF
-~~~
-
-where <old-value> is the old object name stored in the ref, <new-value> is the new object name to be stored in the ref and <ref-name> is the full name of the ref. When creating a new ref, <old-value> is 40 0.
-
-~~~ruby
+~~~bash
   #!/bin/bash
-  # check each branch being pushed
-
-  echo "pre-receive HOOK"
-
-  while read old_sha new_sha refname
+  
+  while read eski_sha yeni_sha refname
   do
-    if git diff "$old_sha" "$new_sha" | grep -qE '^\+(<<<<<<<|>>>>>>>)'; then
+    if git diff "$eski_sha" "$yeni_sha" | grep -qE '^\+(<<<<<<<|>>>>>>>)'; then
       echo "Conflict'e sebep olacak işaretler bulundu $(basename "$refname")."
-      git diff "$old_sha" "$new_sha" | grep -nE '^\+(<<<<<<<|>>>>>>>)'
+      git diff "$eski_sha" "$yeni_sha" | grep -nE '^\+(<<<<<<<|>>>>>>>)'
       exit 1
     fi
   done
@@ -182,12 +173,12 @@ where <old-value> is the old object name stored in the ref, <new-value> is the n
 
 ~~~bash
   #!/bin/bash
-  # check each branch being pushed
-  while read old_sha new_sha refname
+  # check if
+  while read eski_sha yeni_sha refname
   do
-    if git diff "$old_sha" "$new_sha" | grep -qE '^\+.*\s+$'; then
+    if git diff "$eski_sha" "$yeni_sha" | grep -qE '^\+.*\s+$'; then
       echo "HATA: Satır sonunda boşluk karakteri var!"
-      git diff "$old_sha" "$new_sha" | grep -nE '^\+.*\s+$'
+      git diff "$eski_sha" "$yeni_sha" | grep -nE '^\+.*\s+$'
       exit 1
     fi
   done
@@ -220,57 +211,46 @@ where <old-value> is the old object name stored in the ref, <new-value> is the n
 
 ## post-update
 
-An example hook script to prepare a packed repository for use over
-dumb transports.
+git dosya eklediğinde veya dosyaları güncellediğinde `git-receive-pack` tarafından çağırılır. Tüm `ref`'ler güncellendikten sonra uzak depoda bir kez çalıştırılır. Her biri gerçekten güncellenen `ref` adı olan değişken sayıda parametre alır. Birincil amacı bildirimdir. `git`'in aldığı paketleri etkileyemez.
 
-To enable this hook, rename this file to "post-update".
+Güncelleme sonrasında, push edilen `HEAD`'in ne olduğu içinde bulunmasına rağmen orijinal ve değiştirilmiş değerlerin içeriği olmadığı için log tutulması konusunda zayıf bir kaynaktır. 
+
+~~~ruby
+  //TODO:add code
+~~~
+
+## pre-auto-gc
+`git gc --auto` tarafından çağırılır. Parametre almaz. Depoları temizlemeden önce bazı kontrolleri yapmak için kullanılır. Otomatik yeniden paketleme işlemini durdurmak için, uygun bir mesaj verdikten sonra sıfır olmayan bir durumdan çıkmalıdır.
+
+~~~bash
+  #!/bin/sh
+  # batarya kontrolu. Sadece bilgisayarımda sarj aleti takılı mı kontrolü yapıyor 
+
+  if test "$(cat /sys/class/power_supply/AC/online 2>/dev/null)" = 1
+  then
+  	exit 0
+  fi
+  
+  echo "Auto packing deferred; not on AC"
+  exit 1
+~~~
 
 ## fsmonitor-watchman
-The hook should output to stdout the list of all files in the working directory that may have changed since the requested time. The logic should be inclusive so that it does not miss any potential changes. The paths should be relative to the root of the working directory and be separated by a single NUL.
-
-
-The exit status determines whether git will use the data from the hook to limit its search. On error, it will fall back to verifying all files and folders.
-
------------------------
 `core.fsmonitor` yapılandırma seçeneği .git/hooks/fsmonitor-watchman olarak ayarlandığında çağırılır. İki parametre alır, birinci parametre versiyon bilgisi, ikinci parametre ise zaman bilgisidir. Zaman bilgisi 1 Ocak 1970'den başlayarak şimdiye kadar geçen nanosaniyeler şeklinde tutulur. Çalışma yolları, çalışma dizinin köküne göre olmalı ve tek bir NUL ile ayrılmalıdır.
 
-Çıkış durumu, git'i aramasını sınırlamak için kancadaki verileri kullanıp kullanmayacağını belirler. Hata durumunda, tüm dosya ve klasörleri doğrulamak için geri düşecek.
-
-
-
-
-An example hook script to integrate Watchman
-(https://facebook.github.io/watchman/) with git to speed up detecting
-new and modified files.
-
-To enable this hook, rename this file to "query-watchman" and set
-'git config core.fsmonitor .git/hooks/query-watchman'
-
+Çıkış durumu, git'i aramasını sınırlamak için kancadaki verileri kullanıp kullanmayacağını belirler. Hata durumunda, tüm dosya ve klasörleri doğrulamak için yapılan değişikler geri alınacaktır.
 
 ## pre-push
-`git-push` tarafından çağırılır. 
+Uzaktaki durumu kontrol ettikten sonra, ancak herhangi bir şey `push` yapılmadan önce `git push` taradından çağırılır. Sıfır olmayan bir sonuç dönerse, hiçbir şey `push` yapılmaz. 2 tane parametre alır. Birincisi parametre gönderme yapılan uzak sunucunun adıdır. İkincisi parametre gönderme yapılan `URL`'dir. Eğer gnerme yapılan uzak sunucuya isim verilmezse iki parametre de eşit olacaktır. 
 
-An example hook script to verify what is about to be pushed.  Called by "git
-push" after it has checked the remote status, but before anything has been
-pushed.  If this script exits with a non-zero status nothing will be pushed.
+Commitler hakkındaki bilgiler, `<yerel ref> <yerel sha1> <uzak_sunucu ref> <uzak_sunucu sha1>` şeklinde standrt girdiden verilir.
 
-This hook is called with the following parameters:
-
-$1 -- Name of the remote to which the push is being done
-$2 -- URL to which the push is being done
-
-If pushing without using a named remote those arguments will be equal.
-
-Information about the commits which are being pushed is supplied as lines to
-the standard input in the form:
-
-  <local ref> <local sha1> <remote ref> <remote sha1>
-
-This sample shows how to prevent push of commits where the log message starts
-with "WIP" (work in progress).
+~~~
+  //TODO: add code
+~~~
 
 ## pre-rebase
-Copyright (c) 2006, 2008 Junio C Hamano
+
 
 The "pre-rebase" hook is run just before "git rebase" starts doing
 its job, and can prevent the command from running by exiting with
@@ -284,3 +264,18 @@ $2 -- the branch being rebased (or empty when rebasing the current branch).
 This sample shows how to prevent topic branches that are already
 merged to 'next' branch from getting rebased, because allowing it
 would result in rebasing already published history.
+
+//TODO: add code
+
+
+## post-checkout
+
+
+## post-merge
+
+
+
+## post-receive
+`git push`'a tepki gösterdiğinde ve deposundaki referansları güncellediğinde git-pack-pack (1) tarafından çağrılır. Tüm referanslar güncellendikten sonra uzak depoda bir kez çalıştırılır. Bu kanca alma işlemi için bir kez yürütülür. Herhangi bir argüman almaz, ancak ön giriş kancasının standart girişindeki gibi aynı bilgiyi alır.
+
+## post-rewrite
