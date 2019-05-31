@@ -63,7 +63,7 @@ echo '   * ikinci bir emre kadar izinleriniz iptal edilmiştir'
 ~~~
 
 ## prepare-commit-msg
-`pre-commit` `hook`'undan sonra çağrılır. Tetiklendiği zaman bir text editörü içerisinde yorum mesajı üretir. Başarılı sonuç dönmesi için `0` dönmesi gerekir. Eğer sıfırdan farklı bir değer dönerse yani başarısız sonuç dönerse `git commit` komutu iptal edilir.
+`pre-commit` `hook`'undan sonra çağrılır. Tetiklendiği zaman bir text editörü içerisinde yorum mesajı üretir. Başarılı sonuç dönmesi için `0` dönmesi gerekir. Eğer sıfırdan farklı bir sonuç dönerse `git commit` komutu iptal edilir. `commit`'lerde otomatik olarak oluşturulması istenen mesajlar için sıkça kullanılır.
 
 `prepate-commit-msg` scripti 1-3 aralığında parametre alır. 
 1. Basılacak mesajı içeren geçici dosyanın adı. Bu dosya değiştirilerek onay mesajı değiştirilebilir
@@ -89,7 +89,17 @@ echo '   * ikinci bir emre kadar izinleriniz iptal edilmiştir'
   File.write(commit_msg_file, text)
 ~~~
 
-İşlem günlüğü iletisini hazırlamak için örnek bir `hook` komut dosyasıdır. `git commit` olarak adlandırılan dosyanın ismiyle commit mesajı, ardından da commitin açıklamasıyla mesajın kaynağını içerir. Bu `hook`'un amacı commiti mesaj dosyasını düzenlemektir. `Hook` sıfır olmayan bir durumla başarısız olursa, commit iptal edildi.
+~~~ruby
+  #!/usr/bin/env ruby
+  # Commit'in sonuna istenilenilen bir sözü ekler
+  msg_file = ARGV[0]
+  content  = File.read(msg_file)
+  QUOTE_OF_DAY = '"Yarını iyileştirmenin tek yolu bugün neyi yanlış yaptığını bilmektir!" ~Robin Sahrman~'.freeze
+
+  content += "\n" + QUOTE_OF_DAY
+  
+  File.write(msg_file, content)
+~~~
 
 ## pre-applypatch
 
@@ -160,6 +170,8 @@ To enable this hook, rename this file to "query-watchman" and set
 
 
 ## pre-push
+`git-push` tarafından çağırılır. 
+
 An example hook script to verify what is about to be pushed.  Called by "git
 push" after it has checked the remote status, but before anything has been
 pushed.  If this script exits with a non-zero status nothing will be pushed.
