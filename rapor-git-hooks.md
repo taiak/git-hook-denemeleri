@@ -149,6 +149,81 @@ Bu kanca `git-commit` veya `git-merge` tarafından çağrılır. `--no-verify` s
   File.write(file_name, content)
 ~~~
 
+## pre-receive
+`git-receive-pack` tarafından çağrılır.
+
+Bu kanca, `git push`'a ve tepki gösterdiğinde ve deposundaki referansları güncellediğinde `git-pack-pack` tarafından çağrılır.
+
+This hook is invoked by git-receive-pack[1] when it reacts to git push and updates reference(s) in its repository. Just before starting to update refs on the remote repository, the pre-receive hook is invoked. Its exit status determines the success or failure of the update.
+
+This hook executes once for the receive operation. It takes no arguments, but for each ref to be updated it receives on standard input a line of the format:
+
+~~~sh
+<old-value> SP <new-value> SP <ref-name> LF
+~~~
+
+where <old-value> is the old object name stored in the ref, <new-value> is the new object name to be stored in the ref and <ref-name> is the full name of the ref. When creating a new ref, <old-value> is 40 0.
+
+~~~ruby
+  #!/bin/bash
+  # check each branch being pushed
+
+  echo "pre-receive HOOK"
+
+  while read old_sha new_sha refname
+  do
+    if git diff "$old_sha" "$new_sha" | grep -qE '^\+(<<<<<<<|>>>>>>>)'; then
+      echo "Conflict'e sebep olacak işaretler bulundu $(basename "$refname")."
+      git diff "$old_sha" "$new_sha" | grep -nE '^\+(<<<<<<<|>>>>>>>)'
+      exit 1
+    fi
+  done
+~~~
+
+~~~bash
+  #!/bin/bash
+  # check each branch being pushed
+  while read old_sha new_sha refname
+  do
+    if git diff "$old_sha" "$new_sha" | grep -qE '^\+.*\s+$'; then
+      echo "HATA: Satır sonunda boşluk karakteri var!"
+      git diff "$old_sha" "$new_sha" | grep -nE '^\+.*\s+$'
+      exit 1
+    fi
+  done
+~~~
+
+
+## update
+
+An example hook script to block unannotated tags from entering.
+Called by "git receive-pack" with arguments: refname sha1-old sha1-new
+
+To enable this hook, rename this file to "update".
+
+Config
+------
+hooks.allowunannotated
+  This boolean sets whether unannotated tags will be allowed into the
+  repository.  By default they won't be.
+hooks.allowdeletetag
+  This boolean sets whether deleting tags will be allowed in the
+  repository.  By default they won't be.
+hooks.allowmodifytag
+  This boolean sets whether a tag may be modified after creation. By default
+  it won't be.
+hooks.allowdeletebranch
+  This boolean sets whether deleting branches will be allowed in the
+  repository.  By default they won't be.
+hooks.denycreatebranch
+  This boolean sets whether remotely creating branches will be denied
+  in the repository.  By default this is allowed.
+
+## post-update
+An example hook script to prepare a packed repository for use over
+dumb transports.
+
+To enable this hook, rename this file to "post-update".
 
 ## fsmonitor-watchman
 
@@ -206,43 +281,3 @@ $2 -- the branch being rebased (or empty when rebasing the current branch).
 This sample shows how to prevent topic branches that are already
 merged to 'next' branch from getting rebased, because allowing it
 would result in rebasing already published history.
-
-## pre-receive
-Push seçeneklerinden yararlanmak için örnek bir kanca betiği.
-Örnek, `echoback =` ile başlayan tüm itme seçeneklerini yansıtır.
-ve `reject` basma seçeneği kullanıldığında tüm basmaları reddeder.
-
-~~~ 
-  //TODO: add command
-~~~
-
-## update
-
-An example hook script to block unannotated tags from entering.
-Called by "git receive-pack" with arguments: refname sha1-old sha1-new
-
-To enable this hook, rename this file to "update".
-
-Config
-------
-hooks.allowunannotated
-  This boolean sets whether unannotated tags will be allowed into the
-  repository.  By default they won't be.
-hooks.allowdeletetag
-  This boolean sets whether deleting tags will be allowed in the
-  repository.  By default they won't be.
-hooks.allowmodifytag
-  This boolean sets whether a tag may be modified after creation. By default
-  it won't be.
-hooks.allowdeletebranch
-  This boolean sets whether deleting branches will be allowed in the
-  repository.  By default they won't be.
-hooks.denycreatebranch
-  This boolean sets whether remotely creating branches will be denied
-  in the repository.  By default this is allowed.
-
-## post-update
-An example hook script to prepare a packed repository for use over
-dumb transports.
-
-To enable this hook, rename this file to "post-update".
