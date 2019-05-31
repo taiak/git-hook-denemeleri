@@ -152,7 +152,7 @@ Bu kanca `git-commit` veya `git-merge` tarafından çağrılır. `--no-verify` s
 ## pre-receive
 `git-receive-pack` tarafından çağrılır.
 
-Bu kanca, `git push`'a ve tepki gösterdiğinde ve deposundaki referansları güncellediğinde `git-pack-pack` tarafından çağrılır.
+Bu kanca`git` referensları yolladığı veya güncellediğinde ve deposundaki referansları güncellediğinde `git-pack-pack` tarafından çağrılır.
 
 This hook is invoked by git-receive-pack[1] when it reacts to git push and updates reference(s) in its repository. Just before starting to update refs on the remote repository, the pre-receive hook is invoked. Its exit status determines the success or failure of the update.
 
@@ -193,52 +193,55 @@ where <old-value> is the old object name stored in the ref, <new-value> is the n
   done
 ~~~
 
-
 ## update
+`pre-receive`'den sonra `git receive-pack` tarafından "ref adı, eski-sha1, yeni-sha1" değerleriyle çağırılır. Uzaktak, depo ref'i güncellemeden önce `update hook` çalıştırılır. Eğer sıfır dönerse ref güncellemesi başarısız sayılır ve iptal edilir.
 
-An example hook script to block unannotated tags from entering.
-Called by "git receive-pack" with arguments: refname sha1-old sha1-new
+~~~ruby
+  #!/usr/bin/env ruby
+  branch      = ARGV[0]
+  eski_commit = ARGV[1]
+  yeni_commit = ARGV[2]
 
-To enable this hook, rename this file to "update".
+  if eski_commit == yeni_commit
+    puts "HATA: #{branch}, içerisinde son commit isimleri aynı: #{eski_commit}"
+    puts "İşlem başarısız.."
+    exit 1 
+  end
+~~~
 
-Config
-------
-hooks.allowunannotated
-  This boolean sets whether unannotated tags will be allowed into the
-  repository.  By default they won't be.
-hooks.allowdeletetag
-  This boolean sets whether deleting tags will be allowed in the
-  repository.  By default they won't be.
-hooks.allowmodifytag
-  This boolean sets whether a tag may be modified after creation. By default
-  it won't be.
-hooks.allowdeletebranch
-  This boolean sets whether deleting branches will be allowed in the
-  repository.  By default they won't be.
-hooks.denycreatebranch
-  This boolean sets whether remotely creating branches will be denied
-  in the repository.  By default this is allowed.
+~~~ruby
+  #!/usr/bin/env ruby
+  branch      = ARGV[0]
+  eski_commit = ARGV[1]
+  yeni_commit = ARGV[2]
+
+  puts "#{branch}, #{eski_commit}'ten #{yeni_commit}'e taşınıyor..."
+~~~
 
 ## post-update
+
 An example hook script to prepare a packed repository for use over
 dumb transports.
 
 To enable this hook, rename this file to "post-update".
 
 ## fsmonitor-watchman
+The hook should output to stdout the list of all files in the working directory that may have changed since the requested time. The logic should be inclusive so that it does not miss any potential changes. The paths should be relative to the root of the working directory and be separated by a single NUL.
 
-Bu seçenek, `core.fsmonitor` yapılandırma seçeneği .git / hooks / fsmonitor-watchman olarak ayarlandığında çağrılır. Bir sürüm (şu anda 1) ve 1 Ocak 1970 gece yarısından bu yana geçen nanosaniye cinsinden geçen süre iki argüman alıyor.
 
-Kanca bir sürümden (şu anda 1) ve bir dize olarak biçimlendirilmiş nanosaniye cinsinden bir süreden geçirilir ve verilen zamandan beri değiştirilmiş olan tüm dosyaları saklar. Yollar, çalışan ağacın köküne göre olmalı ve tek bir NUL ile ayrılmalıdır.
+The exit status determines whether git will use the data from the hook to limit its search. On error, it will fall back to verifying all files and folders.
+
+-----------------------
+`core.fsmonitor` yapılandırma seçeneği .git/hooks/fsmonitor-watchman olarak ayarlandığında çağırılır. İki parametre alır, birinci parametre versiyon bilgisi, ikinci parametre ise zaman bilgisidir. Zaman bilgisi 1 Ocak 1970'den başlayarak şimdiye kadar geçen nanosaniyeler şeklinde tutulur. Çalışma yolları, çalışma dizinin köküne göre olmalı ve tek bir NUL ile ayrılmalıdır.
+
+Çıkış durumu, git'i aramasını sınırlamak için kancadaki verileri kullanıp kullanmayacağını belirler. Hata durumunda, tüm dosya ve klasörleri doğrulamak için geri düşecek.
+
+
+
 
 An example hook script to integrate Watchman
 (https://facebook.github.io/watchman/) with git to speed up detecting
 new and modified files.
-
-The hook is passed a version (currently 1) and a time in nanoseconds
-formatted as a string and outputs to stdout all files that have been
-modified since the given time. Paths must be relative to the root of
-the working tree and separated by a single NUL.
 
 To enable this hook, rename this file to "query-watchman" and set
 'git config core.fsmonitor .git/hooks/query-watchman'
