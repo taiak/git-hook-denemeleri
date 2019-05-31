@@ -119,11 +119,7 @@ Bu kanca `git-commit` veya `git-merge` tarafından çağrılır. `--no-verify` s
 
 git dosya eklediğinde veya dosyaları güncellediğinde `git-receive-pack` tarafından çağırılır. Tüm `ref`'ler güncellendikten sonra uzak depoda bir kez çalıştırılır. Her biri gerçekten güncellenen `ref` adı olan değişken sayıda parametre alır. Birincil amacı bildirimdir. `git`'in aldığı paketleri etkileyemez.
 
-Güncelleme sonrasında, push edilen `HEAD`'in ne olduğu içinde bulunmasına rağmen orijinal ve değiştirilmiş değerlerin içeriği olmadığı için log tutulması konusunda zayıf bir kaynaktır. 
-
-~~~ruby
-  //TODO:add code
-~~~
+Güncelleme sonrasında, push edilen `HEAD`'in ne olduğu içinde bulunmasına rağmen orijinal ve değiştirilmiş değerlerin içeriği olmadığı için log tutulması konusunda zayıf bir kaynaktır.
 
 ## pre-auto-gc
 `git gc --auto` tarafından çağırılır. Parametre almaz. Depoları temizlemeden önce bazı kontrolleri yapmak için kullanılır. Otomatik yeniden paketleme işlemini durdurmak için, uygun bir mesaj verdikten sonra sıfır olmayan bir durumdan çıkmalıdır.
